@@ -2,6 +2,7 @@
 so, downloaded file goes to downloaded. It then renames this file and move it to
 our target folder for further processing'''
 
+import sys
 import pandas as pd
 import numpy as np
 import shutil
@@ -15,45 +16,45 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+
 def create_dir():
-    directory = str(pd.to_datetime('today').date())
+    n = len(sys.argv)
+    date_value = str(pd.to_datetime('today').date())
+    if n > 1:
+        date_arg = sys.argv[1]
+        if date_arg == "-date":
+           date_value = sys.argv[2]   ### "2021-07-25"
+
     try:
-        os.stat(directory)
+        os.stat(date_value)
     except:
-        os.mkdir(directory)
-    return directory
+        os.mkdir(date_value)
+    return date_value
 
 
-def getfiles(dir_path):
+def getfiles(date_value):
     options = webdriver.ChromeOptions()
     #options.headless = True
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
+    date_today = date_value.split('-')
+    yr = date_today[0]
+    mnt = date_today[1]
+    dt = date_today[2]
     
-
-    URL = 'https://www.nseindia.com/all-reports'
-    driver.get(URL)
-    WebDriverWait(driver,10000).until(EC.visibility_of_element_located((By.TAG_NAME,'body')))
-    print(driver.current_url)
-    date_today = pd.to_datetime('today').date()
-    dt = '{:02d}'.format(date_today.day)
-    mnt = '{:02d}'.format(date_today.month)
-    yr = str(date_today.year)
     filename = 'https://archives.nseindia.com/products/content/sec_bhavdata_full_'+dt+mnt+yr+'.csv'
     driver.get(filename)
     print('download complete')
     time.sleep(3)
 
+    status = 0
     source = r'C:\Users\ashishsh\Downloads\sec_bhavdata_full_'+dt+mnt+yr+'.csv'
-    destination = r'C:\Users\ashishsh\Desktop\Python\test11\sec_bhavdata_full_'+dt+mnt+yr+'.csv'
-    shutil.move(source,destination)
-    
+    if os.path.isfile(source):    
+        destination = r'C:\Users\ashishsh\Desktop\delivery_analysis'+'\\'+date_value+'\sec_bhavdata_full.csv'
+        shutil.move(source,destination)
+        status = 1
+    else:
+        status = 0
     driver.quit()
-
-
-def main():
-    dir_path = create_dir()
-    getfiles(dir_path)
-
-if __name__ == "__main__":
-    main()
+    return status
+    

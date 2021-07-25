@@ -20,16 +20,9 @@ def highlight_greaterthan_1(s):
         return ['background-color: white']
 
 
-def create_dir():
-    directory = str(pd.to_datetime('today').date())
-    try:
-        os.stat(directory)
-    except:
-        os.mkdir(directory)
-
-
-def read_files():
-    crnt_data = pd.read_csv(r'sec_bhavdata_full.csv', index_col='SYMBOL')
+def read_files(date_value):
+    bhavfile = r''+date_value+'\sec_bhavdata_full.csv'
+    crnt_data = pd.read_csv(bhavfile, index_col='SYMBOL')
     crnt_data.drop([' DATE1', ' LAST_PRICE', ' AVG_PRICE', ' TTL_TRD_QNTY',
                     ' DELIV_PER'], axis=1, inplace=True)
 
@@ -108,8 +101,8 @@ def read_files():
     # styled.render()
     # styled = newDataFrame.style.applymap(highlight)
     # styled.to_excel('styled.xlsx', engine='openpyxl')
-    directory_name = str(pd.to_datetime('today').date())
-    file_xlsx = str(directory_name + '/' + directory_name + '_bhav_copy' + '.xlsx')
+    directory_name = date_value
+    file_xlsx = str(directory_name + '/' + directory_name + '_bhav_analysis' + '.xlsx')
 
     buy_stock = newDataFrame
     buy_stock = buy_stock[buy_stock['CHANGE'] > 1]
@@ -126,13 +119,4 @@ def read_files():
 
     writer.save()
     newDataFrame.to_csv('analysis_of_delivery.csv')
-
-
-def main():
-    create_dir()
-    read_files()
-    print("Main called")
-
-
-if __name__ == "__main__":
-    main()
+    
